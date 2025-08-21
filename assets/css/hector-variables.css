@@ -1,0 +1,197 @@
+/* Hector Studios - Variáveis CSS Customizáveis */
+/* Baseado na paleta de cores fornecida */
+
+:root {
+    /* === CORES PRINCIPAIS HECTOR STUDIOS === */
+    
+    /* Cores da Paleta Original */
+    --hector-papel: #EFEFEA;        /* Cor de fundo principal */
+    --hector-celeste: #6AD1E3;      /* Azul claro vibrante */
+    --hector-blu: #1A2891;          /* Azul escuro principal */
+    --hector-pink: #E451F5;         /* Rosa vibrante */
+    
+    /* Gradientes Assinatura */
+    --hector-gradient-main: linear-gradient(135deg, #6AD1E3 0%, #1A2891 100%);
+    --hector-gradient-celeste: linear-gradient(135deg, #6AD1E3 0%, #4FB8CC 100%);
+    --hector-gradient-pink: linear-gradient(135deg, #E451F5 0%, #C63DE1 100%);
+    --hector-gradient-blu: linear-gradient(135deg, #2640E5 0%, #1A2891 100%);
+    
+    /* === VARIAÇÕES E TONS === */
+    
+    /* Celeste */
+    --hector-celeste-50: #F0FCFF;
+    --hector-celeste-100: #E0F8FE;
+    --hector-celeste-200: #BAF0FD;
+    --hector-celeste-300: #8DDBE8;
+    --hector-celeste-400: #6AD1E3;
+    --hector-celeste-500: #4FB8CC;
+    --hector-celeste-600: #3A9FB8;
+    --hector-celeste-700: #2A7A8C;
+    --hector-celeste-800: #1F5B6B;
+    --hector-celeste-900: #153E47;
+    
+    /* Blu */
+    --hector-blu-50: #F0F2FF;
+    --hector-blu-100: #E0E5FF;
+    --hector-blu-200: #C7D2FE;
+    --hector-blu-300: #A5B4FC;
+    --hector-blu-400: #8B95F8;
+    --hector-blu-500: #2640E5;
+    --hector-blu-600: #1A2891;
+    --hector-blu-700: #141E73;
+    --hector-blu-800: #0F1654;
+    --hector-blu-900: #0A0E36;
+    
+    /* Pink */
+    --hector-pink-50: #FEF0FF;
+    --hector-pink-100: #FCE0FF;
+    --hector-pink-200: #F9C2FF;
+    --hector-pink-300: #F5A3FF;
+    --hector-pink-400: #F087F7;
+    --hector-pink-500: #E451F5;
+    --hector-pink-600: #C63DE1;
+    --hector-pink-700: #A82BC6;
+    --hector-pink-800: #8A1FA3;
+    --hector-pink-900: #6B1580;
+    
+    /* Neutros baseados no Papel */
+    --hector-neutral-50: #FAFAF9;
+    --hector-neutral-100: #F5F5F0;
+    --hector-neutral-200: #EFEFEA;
+    --hector-neutral-300: #E5E5E0;
+    --hector-neutral-400: #D4D4CE;
+    --hector-neutral-500: #A8A8A0;
+    --hector-neutral-600: #737369;
+    --hector-neutral-700: #525248;
+    --hector-neutral-800: #3A3A33;
+    --hector-neutral-900: #1A1A17;
+    
+    /* === EFEITOS E SOMBRAS === */
+    
+    /* Sombras com cores da Hector */
+    --hector-shadow-celeste: 0 4px 14px 0 rgba(106, 209, 227, 0.2);
+    --hector-shadow-blu: 0 4px 14px 0 rgba(26, 40, 145, 0.2);
+    --hector-shadow-pink: 0 4px 14px 0 rgba(228, 81, 245, 0.2);
+    --hector-shadow-neutral: 0 4px 14px 0 rgba(26, 26, 23, 0.1);
+    
+    /* Glow Effects */
+    --hector-glow-celeste: 0 0 20px rgba(106, 209, 227, 0.4);
+    --hector-glow-blu: 0 0 20px rgba(26, 40, 145, 0.4);
+    --hector-glow-pink: 0 0 20px rgba(228, 81, 245, 0.4);
+    
+    /* === TIPOGRAFIA === */
+    
+    /* Font Family */
+    --hector-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --hector-font-display: 'Inter', system-ui, sans-serif;
+    
+    /* Font Weights */
+    --hector-font-light: 300;
+    --hector-font-normal: 400;
+    --hector-font-medium: 500;
+    --hector-font-semibold: 600;
+    --hector-font-bold: 700;
+    --hector-font-extrabold: 800;
+    
+    /* === ESPACAMENTOS === */
+    
+    /* Bordas e Raios */
+    --hector-radius-sm: 8px;
+    --hector-radius-md: 12px;
+    --hector-radius-lg: 16px;
+    --hector-radius-xl: 20px;
+    --hector-radius-2xl: 24px;
+    
+    /* Espaçamentos */
+    --hector-space-xs: 0.5rem;
+    --hector-space-sm: 0.75rem;
+    --hector-space-md: 1rem;
+    --hector-space-lg: 1.5rem;
+    --hector-space-xl: 2rem;
+    --hector-space-2xl: 3rem;
+    
+    /* === TRANSIÇÕES === */
+    
+    --hector-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --hector-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --hector-transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* === ESTADOS === */
+    
+    /* Hover */
+    --hector-hover-opacity: 0.8;
+    --hector-hover-scale: 1.05;
+    --hector-hover-translate: -4px;
+    
+    /* Focus */
+    --hector-focus-ring: 0 0 0 3px rgba(106, 209, 227, 0.2);
+    
+    /* === COMPONENTES ESPECÍFICOS === */
+    
+    /* Cards */
+    --hector-card-bg: #ffffff;
+    --hector-card-border: rgba(106, 209, 227, 0.1);
+    --hector-card-shadow: var(--hector-shadow-neutral);
+    --hector-card-hover-shadow: var(--hector-shadow-celeste);
+    
+    /* Botões */
+    --hector-btn-padding-x: 1.5rem;
+    --hector-btn-padding-y: 0.75rem;
+    --hector-btn-font-weight: var(--hector-font-semibold);
+    
+    /* Inputs */
+    --hector-input-border: rgba(106, 209, 227, 0.3);
+    --hector-input-focus-border: var(--hector-celeste-400);
+    --hector-input-bg: #ffffff;
+    
+    /* === BREAKPOINTS (para JavaScript) === */
+    
+    --hector-breakpoint-sm: 640px;
+    --hector-breakpoint-md: 768px;
+    --hector-breakpoint-lg: 1024px;
+    --hector-breakpoint-xl: 1280px;
+    --hector-breakpoint-2xl: 1536px;
+}
+
+/* === MODO ESCURO === */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --hector-papel: #1A1A17;
+        --hector-neutral-50: #262622;
+        --hector-neutral-100: #3A3A33;
+        --hector-neutral-200: #525248;
+        
+        --hector-card-bg: rgba(255, 255, 255, 0.05);
+        --hector-card-border: rgba(106, 209, 227, 0.2);
+        --hector-input-bg: rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* === CLASSES UTILITÁRIAS === */
+
+/* Gradientes rápidos */
+.hector-gradient-main { background: var(--hector-gradient-main); }
+.hector-gradient-celeste { background: var(--hector-gradient-celeste); }
+.hector-gradient-pink { background: var(--hector-gradient-pink); }
+.hector-gradient-blu { background: var(--hector-gradient-blu); }
+
+/* Cores de texto */
+.hector-text-celeste { color: var(--hector-celeste-400); }
+.hector-text-blu { color: var(--hector-blu-600); }
+.hector-text-pink { color: var(--hector-pink-500); }
+
+/* Cores de fundo */
+.hector-bg-celeste { background-color: var(--hector-celeste-400); }
+.hector-bg-blu { background-color: var(--hector-blu-600); }
+.hector-bg-pink { background-color: var(--hector-pink-500); }
+.hector-bg-papel { background-color: var(--hector-papel); }
+
+/* Sombras */
+.hector-shadow-celeste { box-shadow: var(--hector-shadow-celeste); }
+.hector-shadow-blu { box-shadow: var(--hector-shadow-blu); }
+.hector-shadow-pink { box-shadow: var(--hector-shadow-pink); }
+
+/* Glow */
+.hector-glow-celeste { box-shadow: var(--hector-glow-celeste); }
+.hector-glow-blu { box-shadow: var(--hector-glow-blu); }
+.hector-glow-pink { box-shadow: var(--hector-glow-pink); }

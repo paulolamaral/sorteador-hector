@@ -1,0 +1,35 @@
+# Sistema de Router PHP - Hector Studios
+# Redireciona todas as requisicoes para o router.php
+
+RewriteEngine On
+
+# Bloquear acesso a arquivos sensiveis
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.sql">
+    Order allow,deny  
+    Deny from all
+</Files>
+
+# Permitir acesso direto a assets
+RewriteCond %{REQUEST_URI} ^/(assets|css|js|images|uploads)/
+RewriteRule ^ - [L]
+
+# Permitir acesso a arquivos existentes (CSS, JS, images, etc.)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Permitir acesso a diretorios existentes
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirecionar tudo para o router PHP
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ router.php [L,QSA]
+
+# Pagina de erro 404 (fallback)
+ErrorDocument 404 /sorteador-hector/404.php

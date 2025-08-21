@@ -1,0 +1,233 @@
+/* ===================================
+   HECTOR STUDIOS - LOGO COMPONENT
+   ================================= */
+
+.hector-logo {
+    display: inline-block;
+    transition: var(--transition, all 0.3s ease);
+}
+
+.hector-logo img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Logo Sizes */
+.hector-logo--xs {
+    width: 24px;
+    height: 24px;
+}
+
+.hector-logo--sm {
+    width: 32px;
+    height: 32px;
+}
+
+.hector-logo--md {
+    width: 48px;
+    height: 48px;
+}
+
+.hector-logo--lg {
+    width: 64px;
+    height: 64px;
+}
+
+.hector-logo--xl {
+    width: 96px;
+    height: 96px;
+}
+
+.hector-logo--2xl {
+    width: 128px;
+    height: 128px;
+}
+
+/* Logo Variants */
+.hector-logo--nav {
+    width: 40px;
+    height: 40px;
+}
+
+.hector-logo--footer {
+    width: 48px;
+    height: 48px;
+}
+
+.hector-logo--login {
+    width: auto !important;
+    height: 48px !important;
+    /* Garantir que o logo não seja muito dominante na tela de login */
+    max-width: 80px !important;
+    max-height: 48px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.hector-logo--login img {
+    width: auto !important;
+    height: 48px !important;
+    max-width: 80px !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* Regra específica para página de login */
+.login-bg .hector-logo--login,
+.login-bg [data-hector-logo="login"] {
+    width: auto !important;
+    height: 48px !important;
+    max-width: 80px !important;
+    max-height: 48px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.login-bg .hector-logo--login img,
+.login-bg [data-hector-logo="login"] img {
+    width: auto !important;
+    height: 48px !important;
+    max-width: 80px !important;
+    max-height: 48px !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+.hector-logo--hero {
+    width: 120px;
+    height: 120px;
+}
+
+/* Hover Effects */
+.hector-logo--hover:hover {
+    transform: scale(1.05);
+}
+
+.hector-logo--glow:hover {
+    filter: drop-shadow(0 0 10px rgba(106, 209, 227, 0.4));
+}
+
+/* Responsive Logo */
+@media (max-width: 768px) {
+    .hector-logo--nav {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .hector-logo--login {
+        width: auto;
+        height: 40px;
+        max-width: 64px;
+    }
+    
+    .hector-logo--login img {
+        width: auto;
+        height: 40px;
+        max-width: 64px;
+        object-fit: contain;
+    }
+    
+    .hector-logo--hero {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .hector-logo-container {
+        gap: 8px;
+    }
+    
+    .hector-logo-container .logo-title {
+        font-size: 0.9em;
+    }
+    
+    .hector-logo-container .logo-subtitle {
+        font-size: 0.7em;
+    }
+}
+
+@media (max-width: 480px) {
+    .hector-logo--nav {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .hector-logo--footer {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .hector-logo--login {
+        width: auto;
+        height: 32px;
+        max-width: 48px;
+    }
+    
+    .hector-logo--login img {
+        width: auto;
+        height: 32px;
+        max-width: 48px;
+        object-fit: contain;
+    }
+    
+    .hector-logo-container .logo-title {
+        font-size: 0.8em;
+    }
+    
+    .hector-logo-container .logo-subtitle {
+        font-size: 0.65em;
+    }
+}
+
+/* Logo Container */
+.hector-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hector-logo-container .logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.hector-logo-container .logo-title {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.hector-logo-container .logo-subtitle {
+    font-size: 0.75em;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+/* Logo Loading */
+.hector-logo img {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hector-logo img.loaded {
+    opacity: 1;
+}
+
+/* Logo Fallback */
+.hector-logo-fallback {
+    background: var(--crepusculo, linear-gradient(135deg, #6AD1E3 0%, #1A2891 100%));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}

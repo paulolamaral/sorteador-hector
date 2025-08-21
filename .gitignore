@@ -1,0 +1,42 @@
+# Arquivos de configuração
+.env
+*.env
+
+# Logs
+*.log
+/logs/
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.bak
+
+# Cache
+/cache/
+/temp/
+
+# Uploads (se houver)
+/uploads/
+
+# Arquivos de debug e teste (para desenvolvimento apenas)
+debug-*.php
+test-*.php
+*-debug.php
+*-test.php
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependências (se usar composer)
+/vendor/
+
+# Backups de banco
+*.sql.backup
+*.sql.bak
