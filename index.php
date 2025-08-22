@@ -1,17 +1,19 @@
 <?php
 /**
  * Página Inicial - Sistema Hector Studios
- * 
- * ATENÇÃO: Este arquivo agora é apenas uma página inicial simples.
- * Todo roteamento é feito pelo router.php através do .htaccess
+ * Design simples e elegante com foco no conteúdo
  */
 
 require_once 'config/environment.php';
+require_once 'config/stats.php';
+
+// Buscar estatísticas reais do banco
+$stats = getSystemStats();
 
 // Dados para a página inicial
 $dados_iniciais = [
-    'titulo' => 'Bem-vindo ao Sistema Hector Studios',
-    'app_name' => $_ENV['APP_NAME'] ?? 'Hector Studios - Sistema de Sorteios'
+    'titulo' => 'Hector Studios - Sistema de Sorteios',
+    'app_name' => $_ENV['APP_NAME'] ?? 'Hector Studios'
 ];
 
 ?>
@@ -20,291 +22,526 @@ $dados_iniciais = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $dados_iniciais['app_name'] ?></title>
+    <title><?= $dados_iniciais['titulo'] ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/hector-theme.css">
     <style>
-        /* Override Tailwind with Hector Theme */
         .gradient-bg {
-            background: var(--crepusculo);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .card-hover {
-            transition: var(--transition);
+            transition: all 0.3s ease;
         }
         .card-hover:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         }
-        .number-display {
-            background: var(--crepusculo);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .modal {
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            transform: scale(0.7);
+            transition: all 0.3s ease;
+        }
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        .section-header {
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #1A2891, #6AD1E3);
+            border-radius: 2px;
+        }
+        .card-border {
+            border: 1px solid #EFEFEA;
+        }
+        .card-border:hover {
+            border-color: #6AD1E3;
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #1A2891 0%, #6AD1E3 100%);
+        }
+        .brand-accent {
+            background: linear-gradient(90deg, #E451F5 0%, #6AD1E3 100%);
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Navigation -->
-    <nav class="gradient-bg shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <div data-hector-logo="nav" 
-                         data-logo-text="true"
-                         data-logo-title="Hector Studios"
-                         data-logo-subtitle="Sistema de Sorteios"
-                         data-logo-hover="true"
-                         data-logo-class="text-white">
-                    </div>
-                </div>
-                
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="<?= makeUrl('/') ?>" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i> Início
-                    </a>
-                    <a href="<?= makeUrl('/sorteios') ?>" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-star mr-1"></i> Sorteios
-                    </a>
-                    <a href="<?= makeUrl('/resultados') ?>" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-trophy mr-1"></i> Resultados
-                    </a>
-                    <a href="<?= makeUrl('/consultar') ?>" class="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-search mr-1"></i> Consultar
-                    </a>
-                    <a href="<?= makeUrl('/admin/login') ?>" class="btn-hector-secondary text-sm px-4 py-2">
-                        <i class="fas fa-cog mr-1"></i> Admin
+<body class="min-h-screen" style="background: linear-gradient(135deg, #EFEFEA 0%, #FFFFFF 50%, #EFEFEA 100%);">
+    <!-- Link Admin Discreto -->
+    <div class="absolute top-4 right-4">
+        <a href="<?= makeUrl('/admin/login') ?>" 
+           class="transition-all duration-300 text-sm font-medium px-3 py-2 rounded-lg shadow-sm hover:shadow-md backdrop-blur-sm" 
+           style="color: #1A2891; background: rgba(255, 255, 255, 0.9);">
+            <i class="fas fa-cog mr-2"></i> Admin
                     </a>
                 </div>
                 
-                <!-- Mobile menu button -->
-                <div class="md:hidden">
-                    <button type="button" class="text-white hover:text-gray-200 p-2" onclick="toggleMobileMenu()">
-                        <i class="fas fa-bars text-lg" id="mobile-menu-icon"></i>
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Logo e Título Principal -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center justify-center mb-8">
+                <img src="assets/images/250403_arq_marca_ass_blu.png" 
+                     alt="HECTOR studios" 
+                     class="h-32 w-auto object-contain">
+            </div>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+                Sorteios com números exclusivos e prêmios incríveis
+            </p>
+            
+            <!-- Botão de Consulta -->
+            <button onclick="openConsultaModal()" 
+                    class="brand-gradient text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                <i class="fas fa-search mr-3"></i>
+                Consultar Meu Número da Sorte
                     </button>
                 </div>
+
+        <!-- Seção de Ganhadores Recentes -->
+        <div class="bg-white rounded-3xl p-8 shadow-xl mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center section-header">
+                <i class="fas fa-trophy text-yellow-600 mr-3"></i>
+                Ganhadores Recentes
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <?php if (empty($stats['ganhadores_recentes'])): ?>
+                    <!-- Sem ganhadores ainda -->
+                    <div class="col-span-3 text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-star text-gray-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-500 mb-2">Nenhum sorteio realizado ainda</h4>
+                        <p class="text-sm text-gray-400">Os primeiros ganhadores aparecerão aqui</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($stats['ganhadores_recentes'] as $index => $ganhador): ?>
+                        <?php 
+                        $cores = [
+                            ['bg' => 'from-yellow-50 to-orange-50', 'border' => 'border-yellow-200', 'icon' => 'fa-crown', 'iconColor' => 'text-yellow-600'],
+                            ['bg' => 'from-blue-50 to-indigo-50', 'border' => 'border-blue-200', 'icon' => 'fa-medal', 'iconColor' => 'text-blue-600'],
+                            ['bg' => 'from-green-50 to-emerald-50', 'border' => 'border-green-200', 'icon' => 'fa-star', 'iconColor' => 'text-green-600']
+                        ];
+                        $cor = $cores[$index] ?? $cores[0];
+                        ?>
+                        <div class="text-center p-6 bg-gradient-to-br <?= $cor['bg'] ?> rounded-2xl border <?= $cor['border'] ?>">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas <?= $cor['icon'] ?> <?= $cor['iconColor'] ?> text-2xl"></i>
             </div>
             
-            <!-- Mobile Navigation Menu -->
-            <div class="md:hidden hidden" id="mobile-menu">
-                <div class="px-2 pt-2 pb-3 space-y-1">
-                    <a href="<?= makeUrl('/') ?>" class="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-home mr-2"></i> Início
-                    </a>
-                    <a href="<?= makeUrl('/sorteios') ?>" class="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-star mr-2"></i> Sorteios
-                    </a>
-                    <a href="<?= makeUrl('/resultados') ?>" class="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-trophy mr-2"></i> Resultados
-                    </a>
-                    <a href="<?= makeUrl('/consultar') ?>" class="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-search mr-2"></i> Consultar
-                    </a>
-                    <a href="<?= makeUrl('/admin/login') ?>" class="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
-                        <i class="fas fa-cog mr-2"></i> Admin
-                    </a>
+                            <!-- Nome do Ganhador -->
+                            <h4 class="font-semibold text-gray-900 mb-3 text-lg"><?= htmlspecialchars($ganhador['nome']) ?></h4>
+                            
+                            <!-- Número da Sorte -->
+                            <p class="text-sm text-gray-600 mb-2">
+                                <span class="font-medium">Nº da Sorte:</span> 
+                                <span class="font-bold text-blue-600"><?= $ganhador['numero_da_sorte'] ?></span>
+                            </p>
+                            
+                            <!-- Nome do Sorteio -->
+                            <p class="text-sm text-gray-700 mb-2 font-medium">
+                                <?= htmlspecialchars($ganhador['nome_sorteio']) ?>
+                            </p>
+                            
+                            <!-- Prêmio -->
+                            <p class="text-lg font-bold text-blue-600 mb-2">
+                                <?= htmlspecialchars($ganhador['valor_premio']) ?>
+                            </p>
+                            
+                            <!-- Data e Hora do Sorteio -->
+                            <p class="text-xs text-gray-500 mb-2">
+                                <i class="fas fa-calendar-alt mr-1"></i>
+                                <?= date('d/m/Y H:i', strtotime($ganhador['data_sorteio'])) ?>
+                            </p>
+                            
+                            <!-- Tempo Relativo -->
+                            <p class="text-xs text-gray-400">
+                                <?= formatarTempoRelativo($ganhador['dias_atras']) ?>
+                            </p>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <!-- Hero Section -->
-        <div class="text-center mb-16">
-            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl mb-8 shadow-2xl">
-                <i class="fas fa-star text-4xl text-white"></i>
-            </div>
-            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                Bem-vindo ao <span class="number-display">Hector Studios</span>
-            </h1>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Sistema completo de sorteios com números da sorte exclusivos. 
-                Participe, acompanhe e concorra a prêmios incríveis!
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="<?= makeUrl('/sorteios') ?>" class="btn-hector-primary px-8 py-4 text-lg">
-                    <i class="fas fa-star mr-2"></i>
-                    Ver Sorteios Disponíveis
-                </a>
-                <a href="<?= makeUrl('/consultar') ?>" class="btn-hector-secondary px-8 py-4 text-lg">
-                    <i class="fas fa-search mr-2"></i>
-                    Consultar Meu Número
-                </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
-        <!-- Features Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <!-- Sorteios -->
-            <div class="card-hector card-hover text-center p-8">
-                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-gift text-2xl text-blue-600"></i>
+        <!-- Seção de Sorteios -->
+        <div class="mb-16">
+            <!-- Sorteios Realizados -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center section-header">
+                    <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                    Sorteios Realizados
+                </h2>
+                
+                <?php if (empty($stats['sorteios_realizados'])): ?>
+                    <div class="text-center py-12 bg-white rounded-3xl shadow-lg">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-trophy text-gray-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-500 mb-2">Nenhum sorteio realizado ainda</h4>
+                        <p class="text-sm text-gray-400">Os primeiros sorteios aparecerão aqui</p>
+                    </div>
+                <?php else: ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <?php foreach ($stats['sorteios_realizados'] as $sorteio): ?>
+                            <div class="bg-white rounded-2xl p-6 shadow-lg card-hover card-border border-l-4 cursor-pointer" 
+                                 style="border-left-color: #1A2891;"
+                                 onclick="abrirModalSorteio(<?= $sorteio['id'] ?>)">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background-color: rgba(26, 40, 145, 0.1);">
+                                        <i class="fas fa-trophy text-xl" style="color: #1A2891;"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                                        <?= htmlspecialchars($sorteio['titulo'] ?: 'Sorteio #' . $sorteio['id']) ?>
+                                    </h3>
+                                    <p class="text-2xl font-bold mb-2" style="color: #1A2891;">
+                                        <?= htmlspecialchars($sorteio['premio'] ?: 'Prêmio') ?>
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <i class="fas fa-calendar-check mr-1"></i>
+                                        <?= date('d/m/Y H:i', strtotime($sorteio['data'])) ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Sorteios Exclusivos</h3>
-                <p class="text-gray-600 mb-6">
-                    Participe de sorteios únicos com prêmios incríveis e chances reais de ganhar.
-                </p>
-                <a href="<?= makeUrl('/sorteios') ?>" class="btn-hector-secondary inline-flex items-center">
-                    Ver Sorteios
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <?php endif; ?>
             </div>
 
-            <!-- Números da Sorte -->
-            <div class="card-hector card-hover text-center p-8">
-                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-hashtag text-2xl text-green-600"></i>
+            <!-- Sorteios Programados -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center section-header">
+                    <i class="fas fa-calendar-plus text-blue-600 mr-3"></i>
+                    Próximos Sorteios
+                </h2>
+                
+                <?php if (empty($stats['sorteios_programados'])): ?>
+                    <div class="text-center py-12 bg-white rounded-3xl shadow-lg">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calendar-alt text-gray-400 text-2xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-500 mb-2">Nenhum sorteio programado</h4>
+                        <p class="text-sm text-gray-400">Novos sorteios serão anunciados em breve</p>
+                    </div>
+                <?php else: ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <?php foreach ($stats['sorteios_programados'] as $sorteio): ?>
+                            <div class="bg-white rounded-2xl p-6 shadow-lg card-hover card-border border-l-4" style="border-left-color: #6AD1E3;">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background-color: rgba(106, 209, 227, 0.1);">
+                                        <i class="fas fa-calendar-alt text-xl" style="color: #6AD1E3;"></i>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Números da Sorte</h3>
-                <p class="text-gray-600 mb-6">
-                    Cada participante recebe um número único da sorte para participar dos sorteios.
-                </p>
-                <a href="<?= makeUrl('/consultar') ?>" class="btn-hector-secondary inline-flex items-center">
-                    Consultar Agora
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                                        <?= htmlspecialchars($sorteio['titulo'] ?: 'Sorteio #' . $sorteio['id']) ?>
+                                    </h3>
+                                    <p class="text-2xl font-bold mb-2" style="color: #6AD1E3;">
+                                        <?= htmlspecialchars($sorteio['premio'] ?: 'Prêmio') ?>
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <?= date('d/m/Y H:i', strtotime($sorteio['data'])) ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Resultados -->
-            <div class="card-hector card-hover text-center p-8">
-                <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-trophy text-2xl text-purple-600"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Resultados Transparentes</h3>
-                <p class="text-gray-600 mb-6">
-                    Veja o histórico completo de todos os sorteios já realizados pela Hector Studios.
-                </p>
-                <a href="<?= makeUrl('/resultados') ?>" class="btn-hector-secondary inline-flex items-center">
-                    Ver Resultados
-                    <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
+            
         </div>
-
-        <!-- Como Funciona -->
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-bold text-gray-900 mb-12">Como Funciona</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">1</div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Cadastro</h4>
-                    <p class="text-sm text-gray-600">Faça seu cadastro no sistema</p>
+        
+        <!-- Modal de Detalhes do Sorteio -->
+        <div id="modalSorteio" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 md:p-4">
+            <div class="modal-content bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 max-w-6xl w-full mx-2 md:mx-4 shadow-2xl max-h-[95vh] overflow-y-auto">
+                <!-- Header do Modal -->
+                <div class="flex justify-between items-center mb-4 md:mb-8">
+                    <h3 class="text-xl md:text-3xl font-bold text-gray-900">
+                        <i class="fas fa-trophy mr-2 md:mr-4 text-2xl md:text-4xl" style="color: #1A2891;"></i>
+                        <span id="modalSorteioTitulo">Detalhes do Sorteio</span>
+                    </h3>
+                    <button onclick="fecharModalSorteio()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fas fa-times text-2xl md:text-3xl"></i>
+                    </button>
                 </div>
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">2</div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Número da Sorte</h4>
-                    <p class="text-sm text-gray-600">Receba seu número único</p>
+                
+                <!-- Loading -->
+                <div id="modalSorteioLoading" class="text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando detalhes do sorteio...</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">3</div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Participe</h4>
-                    <p class="text-sm text-gray-600">Concorra automaticamente</p>
+                
+                <!-- Conteúdo do Modal -->
+                <div id="modalSorteioConteudo" class="hidden">
+                    <!-- Informações Compactas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                        <!-- Info Básica -->
+                        <div class="bg-blue-50 rounded-lg md:rounded-xl p-4 md:p-6">
+                            <div class="text-sm md:text-base font-medium text-blue-600 mb-1 md:mb-2">📅 Data do Sorteio</div>
+                            <div id="modalSorteioData" class="text-lg md:text-xl font-bold text-blue-900"></div>
+                        </div>
+                        
+                        <!-- Prêmio -->
+                        <div class="bg-yellow-50 rounded-lg md:rounded-xl p-4 md:p-6">
+                            <div class="text-sm md:text-base font-medium text-yellow-600 mb-1 md:mb-2">🎁 Prêmio</div>
+                            <div id="modalSorteioPremio" class="text-lg md:text-xl font-bold text-yellow-900"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vencedor (se realizado) -->
+                    <div id="modalSorteioVencedor" class="hidden bg-green-50 rounded-lg md:rounded-xl p-4 md:p-6 mb-6 md:mb-8">
+                        <div class="flex items-center gap-4 md:gap-6">
+                            <div class="w-16 h-16 md:w-20 md:h-20 bg-green-600 rounded-full flex items-center justify-center">
+                                <span id="modalSorteioNumeroSorteado" class="text-2xl md:text-3xl font-bold text-white"></span>
+                            </div>
+                            <div>
+                                <div class="text-base md:text-lg font-medium text-green-600 mb-1 md:mb-2">🏆 Vencedor</div>
+                                <div id="modalSorteioVencedorNome" class="text-xl md:text-2xl font-bold text-green-900 mb-1"></div>
+                                <div id="modalSorteioVencedorLocal" class="text-base md:text-lg text-green-700"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de Invalidados (Blacklist) -->
+                    <div id="modalSorteioBlacklist" class="hidden">
+                        <h4 class="text-lg md:text-xl font-bold text-gray-900 mb-3 md:mb-4 flex items-center">
+                            <i class="fas fa-ban mr-2 md:mr-3 text-red-600 text-xl md:text-2xl"></i>
+                            Participantes Invalidados
+                            <span id="modalSorteioBlacklistCount" class="ml-2 md:ml-3 text-base md:text-lg text-gray-500"></span>
+                        </h4>
+                        <div class="bg-red-50 rounded-lg md:rounded-xl p-4 md:p-6">
+                            <div id="modalSorteioBlacklistLista" class="space-y-3 md:space-y-4 max-h-48 md:max-h-64 overflow-y-auto">
+                                <!-- Lista será preenchida via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">4</div>
-                    <h4 class="font-semibold text-gray-900 mb-2">Ganhe</h4>
-                    <p class="text-sm text-gray-600">Seja sorteado e ganhe!</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- CTA Final -->
-        <div class="gradient-bg rounded-3xl p-8 md:p-12 text-center text-white">
-            <h2 class="text-3xl md:text-4xl font-bold mb-4">Pronto para Participar?</h2>
-            <p class="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-                Junte-se a milhares de participantes e concorra a prêmios incríveis. 
-                Sua sorte está a um clique de distância!
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="<?= makeUrl('/sorteios') ?>" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-star mr-2"></i>
-                    Ver Sorteios Ativos
-                </a>
-                <a href="<?= makeUrl('/consultar') ?>" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                    <i class="fas fa-search mr-2"></i>
-                    Consultar Número
-                </a>
             </div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="gradient-hector text-white py-12 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Logo -->
-                <div data-hector-logo="footer" 
-                     data-logo-text="true"
-                     data-logo-title="Hector Studios"
-                     data-logo-subtitle="Sistema de Sorteios"
-                     data-logo-class="text-white"
-                     data-logo-size="footer">
+    <!-- Modal de Consulta -->
+    <div id="consultaModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 md:p-4">
+        <div class="modal-content bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 max-w-md w-full mx-2 md:mx-4 shadow-2xl">
+            <!-- Header do Modal -->
+            <div class="flex justify-between items-center mb-6">
+                                 <h3 class="text-2xl font-bold text-gray-900">
+                 <i class="fas fa-search mr-3" style="color: #1A2891;"></i>
+                 Consultar Número da Sorte
+             </h3>
+                <button onclick="closeConsultaModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
                 </div>
                 
-                <!-- Links -->
-                <div class="text-center">
-                    <h4 class="font-semibold mb-4">Navegação</h4>
-                    <div class="space-y-2">
-                        <a href="<?= makeUrl('/') ?>" class="block text-white opacity-80 hover:opacity-100">Início</a>
-                        <a href="<?= makeUrl('/sorteios') ?>" class="block text-white opacity-80 hover:opacity-100">Sorteios</a>
-                        <a href="<?= makeUrl('/resultados') ?>" class="block text-white opacity-80 hover:opacity-100">Resultados</a>
-                        <a href="<?= makeUrl('/consultar') ?>" class="block text-white opacity-80 hover:opacity-100">Consultar</a>
-                    </div>
+            <!-- Formulário de Consulta -->
+            <form id="consultaForm" class="space-y-6">
+                <!-- Campo de Busca -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Digite seu email ou número da sorte:
+                    </label>
+                    <input type="text" 
+                           id="consultaInput" 
+                           name="consulta" 
+                           placeholder="exemplo@email.com ou 1234"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                           required>
                 </div>
                 
-                <!-- Contato -->
-                <div class="text-center md:text-right">
-                    <h4 class="font-semibold mb-4">Suporte</h4>
-                    <p class="text-sm opacity-80">Sistema desenvolvido com</p>
-                    <p class="text-sm opacity-80">tecnologia e inovação</p>
-                    <div class="mt-4">
-                        <a href="<?= makeUrl('/admin/login') ?>" class="text-sm opacity-60 hover:opacity-100">
-                            <i class="fas fa-cog mr-1"></i> Área Administrativa
-                        </a>
-                    </div>
+                <!-- Botões -->
+                <div class="flex gap-3">
+                                         <button type="submit" 
+                             class="flex-1 brand-gradient text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-0 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                         <i class="fas fa-search mr-2"></i>
+                         Consultar
+                     </button>
+                    <button type="button" 
+                            onclick="closeConsultaModal()"
+                            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </button>
                 </div>
-            </div>
-            
-            <hr class="border-white border-opacity-20 my-8">
-            
-            <div class="text-center">
-                <p class="text-sm opacity-80">&copy; 2024 Hector Studios. Todos os direitos reservados.</p>
-            </div>
-        </div>
-    </footer>
+            </form>
 
+            <!-- Resultado da Consulta -->
+            <div id="consultaResultado" class="hidden mt-6 p-4 bg-gray-50 rounded-xl">
+                <div id="consultaContent"></div>
+                    </div>
+                </div>
+            </div>
+            
     <!-- JavaScript -->
     <script>
-        // Toast notification system com tema Hector Studios
+        // Funções do Modal
+        function openConsultaModal() {
+            document.getElementById('consultaModal').classList.add('show');
+            document.getElementById('consultaInput').focus();
+        }
+
+        function closeConsultaModal() {
+            document.getElementById('consultaModal').classList.remove('show');
+            document.getElementById('consultaResultado').classList.add('hidden');
+            document.getElementById('consultaForm').reset();
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('consultaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConsultaModal();
+            }
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeConsultaModal();
+            }
+        });
+
+        // Formulário de consulta
+        document.getElementById('consultaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const input = document.getElementById('consultaInput').value.trim();
+            if (!input) return;
+
+            // Simular consulta (substituir por chamada real da API)
+            consultarNumero(input);
+        });
+
+                function consultarNumero(valor) {
+            // Mostrar loading
+            const resultado = document.getElementById('consultaResultado');
+            const content = document.getElementById('consultaContent');
+            
+            resultado.classList.remove('hidden');
+            content.innerHTML = `
+                <div class="text-center">
+                    <div class="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                    <p class="text-gray-600">Consultando...</p>
+                </div>
+            `;
+
+            // Fazer consulta real via AJAX
+            fetch('<?= makeUrl('/api/consulta-participante') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ consulta: valor })
+            })
+            .then(response => {
+                console.log('Status da resposta:', response.status); // Debug
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta da API:', data); // Debug
+                if (data.success) {
+                    const participante = data.data;
+                    
+                    // Preparar informações de prêmios
+                    let premiosHtml = '';
+                    if (participante.premios_ganhos && participante.premios_ganhos.length > 0) {
+                        premiosHtml = `
+                            <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <h5 class="font-semibold text-yellow-800 mb-2">🏆 Prêmios Ganhos:</h5>
+                                ${participante.premios_ganhos.map(premio => `
+                                    <div class="text-sm text-yellow-700 mb-1">
+                                        • ${premio.descricao_premio}
+                                        <span class="text-xs text-yellow-600">(${new Date(premio.data_sorteio).toLocaleDateString('pt-BR')})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else {
+                        premiosHtml = `
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <p class="text-sm text-blue-700">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Ainda não ganhou prêmios, mas está participando dos sorteios!
+                                </p>
+                            </div>
+                        `;
+                    }
+                    
+                    content.innerHTML = `
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-green-600 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Participante Encontrado!</h4>
+                            <p class="text-sm text-gray-600 mb-2">Nome: ${participante.nome}</p>
+                            <p class="text-sm text-gray-600 mb-2">Email: ${participante.email}</p>
+                            <p class="text-2xl font-bold text-blue-600 mb-2">Nº da Sorte: ${participante.numero_da_sorte}</p>
+                            <p class="text-sm text-gray-600 mb-2">Cidade: ${participante.cidade} - ${participante.estado}</p>
+                            ${premiosHtml}
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-times text-red-600 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-900 mb-2">Participante Não Encontrado</h4>
+                            <p class="text-sm text-gray-600 mb-2">${data.message}</p>
+                            <p class="text-xs text-gray-500">Verifique o email ou número informado</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Erro na consulta:', error);
+                console.log('Tipo de erro:', typeof error); // Debug
+                content.innerHTML = `
+            <div class="text-center">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+            </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Erro na Consulta</h4>
+                        <p class="text-sm text-gray-600 mb-2">Ocorreu um erro ao consultar o participante</p>
+                        <p class="text-xs text-gray-500">Tente novamente mais tarde</p>
+        </div>
+                `;
+            });
+        }
+
+        // Toast notifications
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.className = `toast-hector fixed top-4 right-4 p-4 z-50 max-w-sm transform translate-x-full transition-all duration-300 ${
-                type === 'success' ? 'toast-success' : 
-                type === 'error' ? 'toast-error' : 
-                type === 'warning' ? 'toast-warning' : 'toast-info'
-            } text-white`;
-            
-            const icons = {
-                success: 'check-circle',
-                error: 'exclamation-circle', 
-                warning: 'exclamation-triangle',
-                info: 'info-circle'
-            };
+            toast.className = `fixed top-4 right-4 p-4 z-50 max-w-sm transform translate-x-full transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            } text-white rounded-xl shadow-lg`;
             
             toast.innerHTML = `
                 <div class="flex items-center">
-                    <div class="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                        <i class="fas fa-${icons[type]} text-sm"></i>
-                    </div>
-                    <div class="flex-1">
                         <span class="font-medium">${message}</span>
-                    </div>
-                    <button onclick="removeToast(this.parentElement.parentElement)" class="ml-3 hover:bg-white hover:bg-opacity-20 rounded p-1 transition-all">
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-3 hover:bg-white hover:bg-opacity-20 rounded p-1">
                         <i class="fas fa-times text-xs"></i>
                     </button>
                 </div>
@@ -312,60 +549,134 @@ $dados_iniciais = [
             
             document.body.appendChild(toast);
             
-            // Animar entrada
             setTimeout(() => {
                 toast.classList.remove('translate-x-full');
             }, 100);
             
-            // Auto remover
             setTimeout(() => {
-                removeToast(toast);
+                toast.remove();
             }, 5000);
         }
         
-        function removeToast(toast) {
-            if (toast && toast.parentElement) {
-                toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    if (toast.parentElement) {
-                        toast.remove();
-                    }
-                }, 300);
-            }
-        }
-    </script>
-    
-    <!-- Mobile Menu Script -->
-    <script>
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            const icon = document.getElementById('mobile-menu-icon');
+        // Funções para controlar a modal de detalhes do sorteio
+        function abrirModalSorteio(sorteioId) {
+            const modal = document.getElementById('modalSorteio');
+            const loading = document.getElementById('modalSorteioLoading');
+            const conteudo = document.getElementById('modalSorteioConteudo');
             
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
+            // Mostrar modal e loading
+            modal.classList.add('show');
+            loading.classList.remove('hidden');
+            conteudo.classList.add('hidden');
+            
+            // Buscar detalhes do sorteio
+            fetch(`api/sorteio-detalhes.php?id=${sorteioId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    preencherModalSorteio(data);
+                    
+                    // Esconder loading e mostrar conteúdo
+                    loading.classList.add('hidden');
+                    conteudo.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar detalhes do sorteio:', error);
+                    alert('Erro ao carregar detalhes do sorteio: ' + error.message);
+                    fecharModalSorteio();
+                });
+        }
+        
+        function preencherModalSorteio(data) {
+            const sorteio = data.sorteio;
+            
+            // Título
+            document.getElementById('modalSorteioTitulo').textContent = sorteio.titulo;
+            
+            // Data (mais compacta)
+            const dataSorteio = new Date(sorteio.data_sorteio);
+            document.getElementById('modalSorteioData').textContent = 
+                dataSorteio.toLocaleDateString('pt-BR') + ' às ' + 
+                dataSorteio.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+            
+            // Prêmio
+            document.getElementById('modalSorteioPremio').textContent = 
+                sorteio.premio || 'Não informado';
+            
+            // Vencedor (se realizado)
+            const vencedorDiv = document.getElementById('modalSorteioVencedor');
+            if (sorteio.status === 'realizado' && sorteio.vencedor) {
+                document.getElementById('modalSorteioNumeroSorteado').textContent = 
+                    sorteio.numero_sorteado || sorteio.vencedor.numero;
+                document.getElementById('modalSorteioVencedorNome').textContent = 
+                    sorteio.vencedor.nome;
+                document.getElementById('modalSorteioVencedorLocal').textContent = 
+                    `${sorteio.vencedor.cidade || ''} - ${sorteio.vencedor.estado || ''}`.replace(/^ - | - $/g, '');
+                vencedorDiv.classList.remove('hidden');
             } else {
-                menu.classList.add('hidden');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
+                vencedorDiv.classList.add('hidden');
+            }
+            
+            // Lista de participantes invalidados (blacklist)
+            const blacklistDiv = document.getElementById('modalSorteioBlacklist');
+            const blacklistLista = document.getElementById('modalSorteioBlacklistLista');
+            const blacklistCount = document.getElementById('modalSorteioBlacklistCount');
+            
+            if (data.blacklist && data.blacklist.length > 0) {
+                blacklistCount.textContent = `(${data.blacklist.length})`;
+                blacklistLista.innerHTML = '';
+                
+                data.blacklist.forEach(item => {
+                    const blacklistItem = document.createElement('div');
+                    blacklistItem.className = 'bg-white rounded-lg md:rounded-xl p-3 md:p-4 border-l-4 border-red-400 shadow-sm';
+                    blacklistItem.innerHTML = `
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2 md:mb-3">
+                            <span class="text-base md:text-lg font-bold text-gray-900">${item.nome}</span>
+                            <span class="text-sm md:text-base bg-red-100 text-red-800 px-2 md:px-3 py-1 rounded-full font-medium self-start sm:self-auto">Nº ${item.numero_da_sorte}</span>
+                        </div>
+                        <div class="text-sm md:text-base text-gray-600 mb-1 md:mb-2">📍 ${item.cidade || ''} ${item.estado || ''}</div>
+                        <div class="text-xs md:text-sm text-red-600 font-medium">🚫 Motivo: ${item.motivo}</div>
+                    `;
+                    blacklistLista.appendChild(blacklistItem);
+                });
+                
+                blacklistDiv.classList.remove('hidden');
+            } else {
+                blacklistDiv.classList.add('hidden');
             }
         }
         
-        // Fechar menu ao clicar em um link (mobile)
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                const menu = document.getElementById('mobile-menu');
-                const icon = document.getElementById('mobile-menu-icon');
-                menu.classList.add('hidden');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
+        function fecharModalSorteio() {
+            const modal = document.getElementById('modalSorteio');
+            modal.classList.remove('show');
+            
+            // Resetar conteúdo após fechar
+            setTimeout(() => {
+                document.getElementById('modalSorteioLoading').classList.remove('hidden');
+                document.getElementById('modalSorteioConteudo').classList.add('hidden');
+            }, 300);
+        }
+        
+        // Fechar modal ao clicar fora
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('modalSorteio');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    fecharModalSorteio();
+                }
+            });
+            
+            // Fechar modais com ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    fecharModalSorteio();
+                }
             });
         });
     </script>
-    <script src="assets/js/responsive.js"></script>
-    <script src="assets/js/hector-logo.js"></script>
-    <script src="assets/js/hector-components.js"></script>
     
     <?php if (detectEnvironment() === 'development'): ?>
         <!-- Debug Info em Desenvolvimento -->

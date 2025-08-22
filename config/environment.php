@@ -11,15 +11,25 @@ require_once __DIR__ . '/logo-helpers.php';
 function detectEnvironment() {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    
+    // Log de debug
+    error_log("DEBUG detectEnvironment: host = " . $host);
+    error_log("DEBUG detectEnvironment: scriptPath = " . $scriptPath);
+    error_log("DEBUG detectEnvironment: requestUri = " . $requestUri);
     
     // Detectar ambiente baseado no host e caminho
     if (strpos($host, 'localhost') !== false || 
         strpos($host, '127.0.0.1') !== false || 
         strpos($host, '::1') !== false ||
-        strpos($scriptPath, '/sorteador-hector/') !== false) {
+        strpos($scriptPath, '/sorteador-hector/') !== false ||
+        strpos($requestUri, '/sorteador-hector/') !== false) {
+        
+        error_log("DEBUG detectEnvironment: Ambiente detectado como DEVELOPMENT");
         return 'development';
     }
     
+    error_log("DEBUG detectEnvironment: Ambiente detectado como PRODUCTION");
     return 'production';
 }
 
@@ -42,26 +52,43 @@ function getBasePath() {
     static $basePath = null;
     
     if ($basePath === null) {
-        $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
         $env = detectEnvironment();
         
         if ($env === 'development') {
-            // Em desenvolvimento, detectar automaticamente
-            $scriptDir = dirname($scriptPath);
+            // Em desenvolvimento, usar REQUEST_URI para detectar o caminho correto
+            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
             
-            // Se o script está na pasta admin, subir um nível
-            if (basename($scriptDir) === 'admin') {
-                $scriptDir = dirname($scriptDir);
-            }
+            // Log de debug
+            error_log("DEBUG getBasePath: REQUEST_URI = " . $requestUri);
             
-            $basePath = rtrim($scriptDir, '/');
-            if ($basePath === '/') {
-                $basePath = '';
+            // Extrair o caminho base da URI
+            if (preg_match('#^/([^/]+)/#', $requestUri, $matches)) {
+                // Se a URI começa com /sorteador-hector/, usar esse caminho
+                $basePath = '/' . $matches[1];
+                error_log("DEBUG getBasePath: Caminho extraído da URI = " . $basePath);
+            } else {
+                // Fallback: usar SCRIPT_NAME se REQUEST_URI não funcionar
+                $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+                $scriptDir = dirname($scriptPath);
+                
+                // Se o script está na pasta admin, subir um nível
+                if (basename($scriptDir) === 'admin') {
+                    $scriptDir = dirname($scriptDir);
+                }
+                
+                $basePath = rtrim($scriptDir, '/');
+                if ($basePath === '/') {
+                    $basePath = '';
+                }
+                error_log("DEBUG getBasePath: Fallback SCRIPT_NAME = " . $basePath);
             }
         } else {
             // Em produção, assumir que está na raiz
             $basePath = '';
+            error_log("DEBUG getBasePath: Produção, basePath = ''");
         }
+        
+        error_log("DEBUG getBasePath: Final = " . $basePath);
     }
     
     return $basePath;

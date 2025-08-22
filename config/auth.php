@@ -70,18 +70,17 @@ class Auth {
     
     // Verificar se usuário está logado
     public function isLoggedIn() {
-        if (!isset($_SESSION['user_id'])) {
+        error_log("DEBUG isLoggedIn: Verificando se usuário está logado");
+        error_log("DEBUG isLoggedIn: SESSION user_id existe? " . (isset($_SESSION['user_id']) ? 'Sim' : 'Não'));
+        
+        // Verificar apenas se as variáveis de sessão existem
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_nome']) || !isset($_SESSION['user_email'])) {
+            error_log("DEBUG isLoggedIn: Variáveis de sessão incompletas, retornando false");
             return false;
         }
         
-        // Verificar se a sessão ainda é válida
-        $session_id = session_id();
-        $stmt = $this->db->query(
-            "SELECT usuario_id FROM sessoes WHERE id = ? AND expires_at > NOW()",
-            [$session_id]
-        );
-        
-        return $stmt->fetch() !== false;
+        error_log("DEBUG isLoggedIn: Usuário logado, retornando true");
+        return true;
     }
     
     // Obter dados do usuário logado
@@ -109,18 +108,26 @@ class Auth {
     
     // Fazer logout
     public function logout() {
+        error_log("DEBUG Auth logout: Iniciando logout");
+        error_log("DEBUG Auth logout: SESSION user_id existe? " . (isset($_SESSION['user_id']) ? 'Sim' : 'Não'));
+        
         if (isset($_SESSION['user_id'])) {
             // Log da ação
+            error_log("DEBUG Auth logout: Registrando log da ação");
             $this->logAcao($_SESSION['user_id'], 'Logout realizado', "Usuário {$_SESSION['user_nome']} fez logout");
             
             // Remover sessão do banco
             $session_id = session_id();
+            error_log("DEBUG Auth logout: Removendo sessão do banco: " . $session_id);
             $this->db->query("DELETE FROM sessoes WHERE id = ?", [$session_id]);
         }
         
         // Limpar sessão
+        error_log("DEBUG Auth logout: Destruindo sessão");
         session_destroy();
-        session_start();
+        error_log("DEBUG Auth logout: Logout concluído");
+        
+        // NÃO iniciar nova sessão - deixar que o sistema crie quando necessário
     }
     
     // Registrar ação no log

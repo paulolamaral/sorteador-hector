@@ -241,6 +241,52 @@ body {
     border: 1px solid rgba(106, 209, 227, 0.2);
 }
 
+/* Modal de Sorteio */
+.modal {
+    transition: all 0.3s ease-in-out;
+}
+
+.modal.opacity-0 {
+    opacity: 0;
+}
+
+.modal.invisible {
+    visibility: hidden;
+}
+
+.modal-content {
+    transform: scale(0.9);
+    transition: transform 0.3s ease-in-out;
+}
+
+.modal:not(.invisible) .modal-content {
+    transform: scale(1);
+}
+
+/* Cards de participantes na modal */
+.participante-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.participante-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Toast Notifications */
 .toast-hector {
     border-radius: 12px;

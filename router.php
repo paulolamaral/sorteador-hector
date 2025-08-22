@@ -20,6 +20,11 @@ class HectorRouter {
         $this->requestUri = $this->getCleanUri();
         $this->requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         
+        // Log de debug
+        error_log("DEBUG Router: basePath = " . $this->basePath);
+        error_log("DEBUG Router: REQUEST_URI original = " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+        error_log("DEBUG Router: requestUri limpa = " . $this->requestUri);
+        
         // Registrar rotas
         $this->registerRoutes();
     }
@@ -30,20 +35,28 @@ class HectorRouter {
     private function getCleanUri() {
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
         
+        error_log("DEBUG getCleanUri: URI original = " . $uri);
+        error_log("DEBUG getCleanUri: basePath = " . $this->basePath);
+        
         // Remover diretório base
         if ($this->basePath && strpos($uri, $this->basePath) === 0) {
             $uri = substr($uri, strlen($this->basePath));
+            error_log("DEBUG getCleanUri: URI após remover basePath = " . $uri);
         }
         
         // Remover query string
         if (($pos = strpos($uri, '?')) !== false) {
             $uri = substr($uri, 0, $pos);
+            error_log("DEBUG getCleanUri: URI após remover query = " . $uri);
         }
         
         // Normalizar
         $uri = trim($uri, '/');
+        $finalUri = $uri === '' ? '/' : '/' . $uri;
         
-        return $uri === '' ? '/' : '/' . $uri;
+        error_log("DEBUG getCleanUri: URI final = " . $finalUri);
+        
+        return $finalUri;
     }
     
     /**
@@ -65,7 +78,6 @@ class HectorRouter {
         
         // Área administrativa - Login
         $this->get('/admin/login', 'AdminController@loginForm');
-        $this->post('/admin/login', 'AdminController@loginProcess');
         $this->get('/admin/logout', 'AdminController@logout');
         
         // Área administrativa - Dashboard
@@ -94,6 +106,15 @@ class HectorRouter {
         $this->post('/api/sorteio', 'ApiController@sorteio');
         $this->post('/api/participante', 'ApiController@participante');
         $this->post('/api/upload', 'ApiController@upload', ['auth']);
+        
+        // API Externa (para sistemas externos)
+        $this->post('/api/external/participante', 'ExternalApiController@cadastrarParticipante');
+        $this->get('/api/external/participante/{email}', 'ExternalApiController@consultarParticipante');
+        $this->get('/api/external/participantes', 'ExternalApiController@listarParticipantes');
+        $this->get('/api/external/health', 'ExternalApiController@healthCheck');
+        
+        // API de Consulta Pública
+        $this->post('/api/consulta-participante', 'PublicApiController@consultaParticipante');
         
         // API Administrativa
         $this->post('/admin/api/blacklist', 'AdminApiController@blacklist', ['auth']);

@@ -31,5 +31,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ router.php [L,QSA]
 
-# Pagina de erro 404 (fallback)
-ErrorDocument 404 /sorteador-hector/404.php
+# Pagina de erro 404 (fallback) - usar URL relativa
+ErrorDocument 404 404.php

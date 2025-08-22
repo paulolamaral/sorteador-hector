@@ -1,0 +1,20 @@
+# Exemplo de configurações para a API Externa
+# Copie estas linhas para o seu arquivo .env
+
+# Configurações da API Externa
+API_EXTERNAL_ENABLED=true
+API_EXTERNAL_TOKEN=hector_api_2024_xyz789abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
+API_EXTERNAL_RATE_LIMIT=100
+API_EXTERNAL_RATE_LIMIT_WINDOW=3600
+
+# Explicação das configurações:
+# API_EXTERNAL_ENABLED: Habilita (true) ou desabilita (false) a API externa
+# API_EXTERNAL_TOKEN: Token secreto para autenticação (deve ser longo e complexo)
+# API_EXTERNAL_RATE_LIMIT: Máximo de requisições por IP na janela de tempo
+# API_EXTERNAL_RATE_LIMIT_WINDOW: Janela de tempo em segundos (3600 = 1 hora)
+
+# IMPORTANTE: 
+# - Gere um token único e seguro para produção
+# - Nunca compartilhe o token
+# - Use HTTPS em produção
+# - Monitore os logs da API regularmente

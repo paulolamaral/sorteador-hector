@@ -7,7 +7,9 @@ $projectRoot = dirname(__DIR__);
 // Verificar se foi chamado pelo router
 if (!isset($GLOBALS['page'])) {
     // Se não foi chamado pelo router, redirecionar para dashboard
-    header('Location: /admin/dashboard');
+    // Usar makeUrl para respeitar o ambiente (desenvolvimento vs produção)
+    require_once $projectRoot . '/config/environment.php';
+    header('Location: ' . makeUrl('/admin/dashboard'));
     exit;
 }
 
