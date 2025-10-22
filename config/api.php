@@ -9,8 +9,6 @@
 // Configurações da API
 define('API_EXTERNAL_ENABLED', $_ENV['API_EXTERNAL_ENABLED'] ?? 'false');
 define('API_EXTERNAL_TOKEN', $_ENV['API_EXTERNAL_TOKEN'] ?? '');
-define('API_EXTERNAL_RATE_LIMIT', (int)($_ENV['API_EXTERNAL_RATE_LIMIT'] ?? 100));
-define('API_EXTERNAL_RATE_LIMIT_WINDOW', (int)($_ENV['API_EXTERNAL_RATE_LIMIT_WINDOW'] ?? 3600));
 
 // Função para obter configuração da API
 function getApiConfig($key) {
@@ -19,10 +17,6 @@ function getApiConfig($key) {
             return API_EXTERNAL_ENABLED === 'true';
         case 'token':
             return API_EXTERNAL_TOKEN;
-        case 'rate_limit':
-            return API_EXTERNAL_RATE_LIMIT;
-        case 'rate_limit_window':
-            return API_EXTERNAL_RATE_LIMIT_WINDOW;
         default:
             return null;
     }
@@ -32,34 +26,6 @@ function getApiConfig($key) {
 function validateApiToken($token) {
     $expectedToken = getApiConfig('token');
     return !empty($expectedToken) && hash_equals($expectedToken, $token);
-}
-
-// Função para verificar rate limit
-function checkRateLimit($ip) {
-    $db = getDB();
-    $window = getApiConfig('rate_limit_window');
-    $limit = getApiConfig('rate_limit');
-    
-    try {
-        // Limpar registros antigos
-        $db->query("DELETE FROM api_rate_limit WHERE created_at < DATE_SUB(NOW(), INTERVAL ? SECOND)", [$window]);
-        
-        // Contar requisições na janela de tempo
-        $stmt = $db->query("SELECT COUNT(*) as count FROM api_rate_limit WHERE ip = ? AND created_at > DATE_SUB(NOW(), INTERVAL ? SECOND)", [$ip, $window]);
-        $count = $stmt->fetch()['count'] ?? 0;
-        
-        if ($count >= $limit) {
-            return false; // Rate limit excedido
-        }
-        
-        // Registrar nova requisição
-        $db->query("INSERT INTO api_rate_limit (ip, created_at) VALUES (?, NOW())", [$ip]);
-        
-        return true; // Rate limit OK
-    } catch (Exception $e) {
-        error_log("Erro ao verificar rate limit: " . $e->getMessage());
-        return true; // Em caso de erro, permitir
-    }
 }
 
 // Função para gerar resposta JSON padronizada

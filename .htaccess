@@ -1,5 +1,5 @@
 # Sistema de Router PHP - Hector Studios
-# Redireciona todas as requisicoes para o router.php
+# Redireciona todas as requisicoes para o router.php, EXCETO APIs
 
 RewriteEngine On
 
@@ -18,6 +18,10 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI} ^/(assets|css|js|images|uploads)/
 RewriteRule ^ - [L]
 
+# PERMITIR ACESSO DIRETO ÀS APIS (NOVO!)
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^ - [L]
+
 # Permitir acesso a arquivos existentes (CSS, JS, images, etc.)
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
@@ -26,10 +30,50 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Redirecionar tudo para o router PHP
+# Redirecionar tudo para o router PHP (sistema original)    
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ router.php [L,QSA]
 
 # Pagina de erro 404 (fallback) - usar URL relativa
 ErrorDocument 404 404.php
+
+# Hector Studios - Sistema de Sorteios
+# Otimizações para favicon e performance
+
+# Cache para favicon
+<FilesMatch "250403_arq_marca_H_crepusculo\.png">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+    Header set Expires "Thu, 31 Dec 2024 23:59:59 GMT"
+</FilesMatch>
+
+# Compressão GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Cache para arquivos estáticos
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Segurança
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-A API Externa permite que sistemas externos cadastrem participantes e consultem informações via HTTP, com autenticação por token e controle de rate limit.
+A API Externa permite que sistemas externos cadastrem participantes e consultem informações via HTTP, com autenticação por token.
 
 ## Configuração
 
@@ -12,16 +12,12 @@ A API Externa permite que sistemas externos cadastrem participantes e consultem 
 # Configurações da API Externa
 API_EXTERNAL_ENABLED=true
 API_EXTERNAL_TOKEN=seu_token_secreto_aqui_muito_longo_e_complexo
-API_EXTERNAL_RATE_LIMIT=100
-API_EXTERNAL_RATE_LIMIT_WINDOW=3600
 ```
 
 ### Configurações
 
-- **API_EXTERNAL_ENABLED**: Habilita/desabilita a API (true/false)
+- **API_EXTERNAL_ENABLED**: Habilita/desabilitada a API (true/false)
 - **API_EXTERNAL_TOKEN**: Token secreto para autenticação
-- **API_EXTERNAL_RATE_LIMIT**: Máximo de requisições por IP
-- **API_EXTERNAL_RATE_LIMIT_WINDOW**: Janela de tempo em segundos (3600 = 1 hora)
 
 ## Autenticação
 
@@ -228,8 +224,7 @@ Verifica o status da API e conexão com banco de dados.
     "timestamp": "2024-01-15T10:30:00+00:00",
     "database": "OK",
     "api_enabled": true,
-    "rate_limit": 100,
-    "rate_limit_window": 3600
+
   }
 }
 ```
@@ -242,16 +237,11 @@ Verifica o status da API e conexão com banco de dados.
 - **404**: Participante não encontrado
 - **405**: Método não permitido
 - **409**: Email já cadastrado
-- **429**: Rate limit excedido
+
 - **500**: Erro interno do servidor
 - **503**: API desabilitada
 
-## Rate Limiting
 
-A API implementa controle de rate limit por IP:
-- **Padrão**: 100 requisições por hora por IP
-- **Configurável**: Via variáveis de ambiente
-- **Limpeza automática**: Registros antigos são removidos automaticamente
 
 ## Validações
 
@@ -347,7 +337,6 @@ curl_close($ch);
 ## Segurança
 
 - **Autenticação**: Token secreto obrigatório
-- **Rate Limiting**: Proteção contra spam
 - **Validação**: Dados sanitizados e validados
 - **Logs**: Auditoria completa de todas as ações
 - **HTTPS**: Recomendado para produção
@@ -359,13 +348,11 @@ curl_close($ch);
 - Requisições por IP
 - Ações realizadas
 - Status do banco de dados
-- Rate limit atingido
 
 ### Logs de Erro
 - Erros de validação
 - Falhas de autenticação
 - Problemas de banco de dados
-- Rate limit excedido
 
 ## Suporte
 

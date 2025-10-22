@@ -55,7 +55,7 @@ function getSystemStats() {
                 data_sorteio,
                 status
             FROM sorteios 
-            WHERE status = 'programado' 
+            WHERE status IN ('programado', 'agendado') 
             AND data_sorteio >= CURRENT_DATE()
             ORDER BY data_sorteio ASC
             LIMIT 4
@@ -77,7 +77,7 @@ function getSystemStats() {
         $stmt = $db->query("
             SELECT COUNT(*) as total 
             FROM participantes 
-            WHERE ativo = 1
+            WHERE ativo = 1 OR ativo IS NULL
         ");
         $result = $stmt->fetch();
         $stats['total_participantes'] = $result['total'] ?? 0;
@@ -174,9 +174,11 @@ function buscarParticipante($valor) {
                 'data' => $participante
             ];
         } else {
+            // Determinar se foi busca por email ou número para mensagem mais específica
+            $tipoBusca = strpos($valor, '@') !== false ? 'email' : 'número da sorte';
             return [
                 'success' => false,
-                'message' => 'Participante não encontrado'
+                'message' => "Participante não encontrado com este {$tipoBusca}"
             ];
         }
         

@@ -9,6 +9,11 @@ require_once __DIR__ . '/logo-helpers.php';
 
 // Função para detectar o ambiente
 function detectEnvironment() {
+    // Verificar se temos configuração no .env
+    if (isset($_ENV['APP_ENV'])) {
+        return $_ENV['APP_ENV'];
+    }
+    
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
     $requestUri = $_SERVER['REQUEST_URI'] ?? '';
@@ -50,52 +55,33 @@ function getEnvironmentConfig() {
 // Função para obter diretório base
 function getBasePath() {
     static $basePath = null;
-    
     if ($basePath === null) {
-        $env = detectEnvironment();
-        
-        if ($env === 'development') {
-            // Em desenvolvimento, usar REQUEST_URI para detectar o caminho correto
-            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-            
-            // Log de debug
-            error_log("DEBUG getBasePath: REQUEST_URI = " . $requestUri);
-            
-            // Extrair o caminho base da URI
-            if (preg_match('#^/([^/]+)/#', $requestUri, $matches)) {
-                // Se a URI começa com /sorteador-hector/, usar esse caminho
-                $basePath = '/' . $matches[1];
-                error_log("DEBUG getBasePath: Caminho extraído da URI = " . $basePath);
-            } else {
-                // Fallback: usar SCRIPT_NAME se REQUEST_URI não funcionar
-                $scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
-                $scriptDir = dirname($scriptPath);
-                
-                // Se o script está na pasta admin, subir um nível
-                if (basename($scriptDir) === 'admin') {
-                    $scriptDir = dirname($scriptDir);
-                }
-                
-                $basePath = rtrim($scriptDir, '/');
-                if ($basePath === '/') {
-                    $basePath = '';
-                }
-                error_log("DEBUG getBasePath: Fallback SCRIPT_NAME = " . $basePath);
-            }
-        } else {
-            // Em produção, assumir que está na raiz
-            $basePath = '';
-            error_log("DEBUG getBasePath: Produção, basePath = ''");
+        // Caminho do script a partir da raiz do servidor. Ex: /router.php ou /projeto/router.php
+        $script_name = $_SERVER['SCRIPT_NAME'];
+
+        // Diretório do script. Ex: / ou /projeto
+        $base_path = dirname($script_name);
+
+        // Se o diretório for a raiz ('/' ou '\'), normalizamos para uma string vazia.
+        // Isso é crucial para sites que rodam na raiz do domínio.
+        if ($base_path === '/' || $base_path === '\\') {
+            $base_path = '';
         }
         
-        error_log("DEBUG getBasePath: Final = " . $basePath);
+        $basePath = $base_path;
     }
-    
     return $basePath;
 }
 
 // Função para obter URL base completa
 function getFullBaseUrl() {
+    // Primeiro, tentar usar a configuração do .env
+    if (isset($_ENV['BASE_URL'])) {
+        $baseUrl = $_ENV['BASE_URL'];
+        error_log("DEBUG getFullBaseUrl: Usando BASE_URL do .env: " . $baseUrl);
+        return $baseUrl;
+    }
+    
     $scheme = $_SERVER['REQUEST_SCHEME'] ?? (isset($_SERVER['HTTPS']) ? 'https' : 'http');
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $basePath = getBasePath();
@@ -103,20 +89,28 @@ function getFullBaseUrl() {
     return $scheme . '://' . $host . $basePath;
 }
 
-// Função para gerar URLs corretas
+
 function makeUrl($path = '') {
+    // TESTE DEFINITIVO - PASSO 2
+    //die("PAREI AQUI DE NOVO: A função makeUrl() que você está editando FOI EXECUTADA. O path recebido foi: " . $path);
+    // 1. Pega a URL base completa e limpa.
+    // Ex: "http://localhost/sorteador-hector" ou "https://sorteios.hectorstudios.com.br"
     $baseUrl = getFullBaseUrl();
-    
-    // Normalizar path
+
+    // 2. Garante que o path comece com uma barra para a junção correta.
     if ($path && $path[0] !== '/') {
         $path = '/' . $path;
     }
-    
-    return $baseUrl . $path;
+
+    // 3. Junta os dois de forma segura, usando rtrim para evitar barras duplas.
+    //    Ex: rtrim(".../sorteador-hector", '/') resulta em ".../sorteador-hector"
+    //    Então ele adiciona o $path, resultando em ".../sorteador-hector/admin/dashboard"
+    return rtrim($baseUrl, '/') . $path;
 }
 
 // Função para redirecionar respeitando o ambiente
 function redirectTo($path, $permanent = false) {
+    //die("PAREI AQUI: A função redirectTo() no arquivo que você está editando FOI EXECUTADA. O path recebido foi: " . $path);
     $url = makeUrl($path);
     $statusCode = $permanent ? 301 : 302;
     

@@ -6,15 +6,37 @@
 
 require_once 'config/environment.php';
 require_once 'config/stats.php';
+require_once 'config/logger.php';
+
+// Log de início da página
+logInfo("🔍 PÁGINA INICIAL: Carregando página principal");
 
 // Buscar estatísticas reais do banco
-$stats = getSystemStats();
+try {
+    $startTime = microtime(true);
+    $stats = getSystemStats();
+    $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+    
+    logPerformance("Busca de estatísticas", $executionTime);
+    logInfo("🔍 PÁGINA INICIAL: Estatísticas carregadas em {$executionTime}ms");
+} catch (Exception $e) {
+    logError("Erro ao carregar estatísticas: " . $e->getMessage());
+    $stats = [
+        'sorteios_realizados' => [],
+        'sorteios_programados' => [],
+        'total_participantes' => 0,
+        'premios_distribuidos' => 0,
+        'ganhadores_recentes' => []
+    ];
+}
 
 // Dados para a página inicial
 $dados_iniciais = [
     'titulo' => 'Hector Studios - Sistema de Sorteios',
     'app_name' => $_ENV['APP_NAME'] ?? 'Hector Studios'
 ];
+
+logInfo("🔍 PÁGINA INICIAL: Dados iniciais preparados", $dados_iniciais);
 
 ?>
 <!DOCTYPE html>
@@ -23,6 +45,20 @@ $dados_iniciais = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $dados_iniciais['titulo'] ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="shortcut icon" href="assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="apple-touch-icon" href="assets/images/250403_arq_marca_H_crepusculo.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1A2891">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hector Studios">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -442,8 +478,23 @@ $dados_iniciais = [
                 </div>
             `;
 
+            // URLs da API - usar configurações do .env se disponível
+            const apiUrl = '<?= $_ENV['API_CONSULTA_URL'] ?? "./api/consulta-participante" ?>';
+            const fallbackUrl = '<?= $_ENV['API_CONSULTA_FALLBACK_URL'] ?? "./api/consulta-participante.php" ?>';
+            
+            // Log das URLs que serão usadas
+            console.log('🔍 DEBUG - Iniciando consulta:', valor);
+            console.log('🔍 DEBUG - URL principal:', apiUrl);
+            console.log('🔍 DEBUG - URL fallback:', fallbackUrl);
+            console.log('🔍 DEBUG - Base URL configurada:', '<?= getFullBaseUrl() ?>');
+            console.log('🔍 DEBUG - Ambiente:', '<?= detectEnvironment() ?>');
+            console.log('🔍 DEBUG - Localização atual:', window.location.href);
+            
+            // Log no servidor também
+            <?php logInfo("🔍 API CONSULTA: Iniciando consulta para: " . json_encode(['valor' => 'VALOR_PLACEHOLDER'])); ?>
+            
             // Fazer consulta real via AJAX
-            fetch('<?= makeUrl('/api/consulta-participante') ?>', {
+            fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -451,14 +502,38 @@ $dados_iniciais = [
                 body: JSON.stringify({ consulta: valor })
             })
             .then(response => {
-                console.log('Status da resposta:', response.status); // Debug
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
+                console.log('🔍 DEBUG - Status da resposta principal:', response.status);
+                console.log('🔍 DEBUG - Headers da resposta:', Object.fromEntries(response.headers.entries()));
+                
+                // Sempre tentar processar a resposta, independente do status
+                return response.json().then(data => {
+                    // Adicionar o status da resposta aos dados para processamento
+                    data._httpStatus = response.status;
+                    return data;
+                });
+            })
+            .catch(error => {
+                console.log('⚠️ DEBUG - Erro na API principal, tentando fallback:', error);
+                
+                // Se der erro na API principal, tentar o fallback
+                return fetch(fallbackUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ consulta: valor })
+                }).then(fallbackResponse => {
+                    console.log('🔍 DEBUG - Status da resposta fallback:', fallbackResponse.status);
+                    
+                    return fallbackResponse.json().then(data => {
+                        data._httpStatus = fallbackResponse.status;
+                        return data;
+                    });
+                });
             })
             .then(data => {
                 console.log('Resposta da API:', data); // Debug
+                
                 if (data.success) {
                     const participante = data.data;
                     
@@ -501,14 +576,37 @@ $dados_iniciais = [
                         </div>
                     `;
                 } else {
+                    // Determinar o tipo de mensagem baseado no status HTTP e na mensagem
+                    let iconClass, bgClass, title, subtitle;
+                    
+                    if (data._httpStatus === 404 || data.message.includes('não encontrado')) {
+                        // Participante não encontrado
+                        iconClass = 'fas fa-search text-orange-600';
+                        bgClass = 'bg-orange-100';
+                        title = 'Participante Não Encontrado';
+                        subtitle = 'Verifique se o email ou número da sorte está correto';
+                    } else if (data._httpStatus === 400) {
+                        // Erro de validação
+                        iconClass = 'fas fa-exclamation-circle text-yellow-600';
+                        bgClass = 'bg-yellow-100';
+                        title = 'Dados Inválidos';
+                        subtitle = 'Verifique as informações fornecidas';
+                    } else {
+                        // Outros erros
+                        iconClass = 'fas fa-exclamation-triangle text-red-600';
+                        bgClass = 'bg-red-100';
+                        title = 'Erro na Consulta';
+                        subtitle = 'Tente novamente mais tarde';
+                    }
+                    
                     content.innerHTML = `
                         <div class="text-center">
-                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-times text-red-600 text-2xl"></i>
+                            <div class="w-16 h-16 ${bgClass} rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="${iconClass} text-2xl"></i>
                             </div>
-                            <h4 class="font-semibold text-gray-900 mb-2">Participante Não Encontrado</h4>
+                            <h4 class="font-semibold text-gray-900 mb-2">${title}</h4>
                             <p class="text-sm text-gray-600 mb-2">${data.message}</p>
-                            <p class="text-xs text-gray-500">Verifique o email ou número informado</p>
+                            <p class="text-xs text-gray-500">${subtitle}</p>
                         </div>
                     `;
                 }
@@ -521,9 +619,9 @@ $dados_iniciais = [
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
             </div>
-                        <h4 class="font-semibold text-gray-900 mb-2">Erro na Consulta</h4>
-                        <p class="text-sm text-gray-600 mb-2">Ocorreu um erro ao consultar o participante</p>
-                        <p class="text-xs text-gray-500">Tente novamente mais tarde</p>
+                        <h4 class="font-semibold text-gray-900 mb-2">Erro de Conexão</h4>
+                        <p class="text-sm text-gray-600 mb-2">Não foi possível conectar com o servidor</p>
+                        <p class="text-xs text-gray-500">Verifique sua conexão e tente novamente</p>
         </div>
                 `;
             });
@@ -564,15 +662,27 @@ $dados_iniciais = [
             const loading = document.getElementById('modalSorteioLoading');
             const conteudo = document.getElementById('modalSorteioConteudo');
             
+            console.log('🔍 DEBUG - Abrindo modal para sorteio ID:', sorteioId);
+            
             // Mostrar modal e loading
             modal.classList.add('show');
             loading.classList.remove('hidden');
             conteudo.classList.add('hidden');
             
             // Buscar detalhes do sorteio
-            fetch(`api/sorteio-detalhes.php?id=${sorteioId}`)
-                .then(response => response.json())
+            const apiUrl = `./api/sorteio-detalhes.php?id=${sorteioId}`;
+            console.log('🔍 DEBUG - URL da API de detalhes:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(response => {
+                    console.log('🔍 DEBUG - Status da resposta detalhes:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('🔍 DEBUG - Dados recebidos:', data);
                     if (data.error) {
                         throw new Error(data.error);
                     }
@@ -584,7 +694,7 @@ $dados_iniciais = [
                     conteudo.classList.remove('hidden');
                 })
                 .catch(error => {
-                    console.error('Erro ao buscar detalhes do sorteio:', error);
+                    console.error('❌ DEBUG - Erro ao buscar detalhes do sorteio:', error);
                     alert('Erro ao carregar detalhes do sorteio: ' + error.message);
                     fecharModalSorteio();
                 });

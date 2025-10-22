@@ -1,9 +1,27 @@
+<?php
+// Incluir configurações do ambiente
+require_once __DIR__ . '/../../config/environment.php';
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $titulo ?? 'Admin - Hector Studios' ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="shortcut icon" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="apple-touch-icon" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="<?= makeUrl('/manifest.json') ?>">
+    <meta name="theme-color" content="#1A2891">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hector Studios Admin">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Chart.js (versão UMD sem módulos) -->
@@ -55,6 +73,11 @@
                     <a href="<?= makeUrl('/admin/relatorios') ?>" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg <?= ($page ?? '') == 'relatorios' ? 'bg-white bg-opacity-20' : '' ?>">
                         <i class="fas fa-chart-bar mr-3"></i>
                         Relatórios
+                    </a>
+                    
+                    <a href="<?= makeUrl('/admin/relatorio-participantes') ?>" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg <?= ($page ?? '') == 'relatorio-participantes' ? 'bg-white bg-opacity-20' : '' ?>">
+                        <i class="fas fa-users mr-3"></i>
+                        Relatório Participantes
                     </a>
                     <a href="<?= makeUrl('/admin/logs') ?>" class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg <?= ($page ?? '') == 'logs' ? 'bg-white bg-opacity-20' : '' ?>">
                         <i class="fas fa-list-alt mr-3"></i>

@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $titulo ?? 'Hector Studios - Sistema de Sorteios' ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="shortcut icon" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    <link rel="apple-touch-icon" href="<?= makeUrl('/assets/images/250403_arq_marca_H_crepusculo.png') ?>">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="<?= makeUrl('/manifest.json') ?>">
+    <meta name="theme-color" content="#1A2891">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hector Studios">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">

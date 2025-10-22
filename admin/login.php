@@ -82,6 +82,13 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Hector Studios</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="shortcut icon" href="../assets/images/250403_arq_marca_H_crepusculo.png">
+    <link rel="apple-touch-icon" href="../assets/images/250403_arq_marca_H_crepusculo.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">

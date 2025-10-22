@@ -9,7 +9,7 @@ if (!isset($GLOBALS['page'])) {
     // Se não foi chamado pelo router, redirecionar para dashboard
     // Usar makeUrl para respeitar o ambiente (desenvolvimento vs produção)
     require_once $projectRoot . '/config/environment.php';
-    header('Location: ' . makeUrl('/admin/dashboard'));
+    header('Location: ' . makeUrl('/dashboard'));
     exit;
 }
 

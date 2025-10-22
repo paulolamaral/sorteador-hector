@@ -100,6 +100,7 @@ class HectorRouter {
         // Área administrativa - Sistema
         $this->get('/admin/configuracoes', 'AdminController@configuracoes', ['auth']);
         $this->get('/admin/relatorios', 'AdminController@relatorios', ['auth']);
+        $this->get('/admin/relatorio-participantes', 'AdminController@relatorioParticipantes', ['auth']);
         $this->get('/admin/logs', 'AdminController@logs', ['auth']);
         
         // API
@@ -176,6 +177,13 @@ class HectorRouter {
         $pattern = '/^' . $pattern . '$/';
         
         return $pattern;
+    }
+    
+    /**
+     * Obter todas as rotas registradas (para debug)
+     */
+    public function getRoutes() {
+        return $this->routes;
     }
     
     /**

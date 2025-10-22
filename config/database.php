@@ -30,6 +30,8 @@ function loadEnv($file = '.env') {
         $_ENV['APP_NAME'] = 'Hector Studios - Sistema de Sorteios';
         $_ENV['APP_ENV'] = 'development';
         $_ENV['APP_DEBUG'] = 'true';
+        $_ENV['BASE_URL'] = 'http://localhost/sorteador-hector';
+        $_ENV['APP_BASE_PATH'] = '/sorteador-hector';
         
         error_log("⚠️ ATENÇÃO: Arquivo .env não encontrado em: " . getcwd() . " - Usando configurações padrão.");
         return false;
@@ -67,6 +69,8 @@ if (($_ENV['APP_DEBUG'] ?? 'false') === 'true') {
     error_log("DB_HOST: " . ($_ENV['DB_HOST'] ?? 'NÃO DEFINIDO'));
     error_log("DB_NAME: " . ($_ENV['DB_NAME'] ?? 'NÃO DEFINIDO'));
     error_log("DB_USER: " . ($_ENV['DB_USER'] ?? 'NÃO DEFINIDO'));
+    error_log("BASE_URL: " . ($_ENV['BASE_URL'] ?? 'NÃO DEFINIDO'));
+    error_log("APP_BASE_PATH: " . ($_ENV['APP_BASE_PATH'] ?? 'NÃO DEFINIDO'));
     error_log("Arquivo .env carregado: " . ($envLoaded ? 'SIM' : 'NÃO - usando padrões'));
 }
 

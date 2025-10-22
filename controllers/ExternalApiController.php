@@ -36,12 +36,6 @@ class ExternalApiController extends BaseController {
             apiResponse(false, null, 'Token de autenticação inválido', 401);
         }
         
-        // Verificar rate limit
-        $clientIp = $this->getClientIp();
-        if (!checkRateLimit($clientIp)) {
-            apiResponse(false, null, 'Rate limit excedido. Tente novamente mais tarde.', 429);
-        }
-        
         try {
             // Obter dados do POST
             $input = file_get_contents('php://input');
@@ -66,78 +60,79 @@ class ExternalApiController extends BaseController {
             // Gerar número da sorte único
             $numeroSorte = generateUniqueLuckyNumber();
             
-                               // Preparar dados para inserção (todos os campos obrigatórios)
-                   $participantData = [
-                       'nome' => trim($data['nome']),
-                       'email' => strtolower(trim($data['email'])),
-                       'telefone' => $this->formatPhone($data['telefone']),
-                       'instagram' => trim($data['instagram']),
-                                               'genero' => trim($data['genero']),
-                        'idade' => trim($data['idade']),
-                        'estado' => strtoupper(trim($data['estado'])),
-                        'cidade' => trim($data['cidade']),
-                        'filhos' => trim($data['filhos']),
-                        'restaurante' => trim($data['restaurante']),
-                        'tempo_hector' => trim($data['tempo_hector']),
-                        'motivo' => trim($data['motivo']),
-                        'comprometimento' => (int)$data['comprometimento'],
-                       'comentario' => trim($data['comentario']),
-                       'numero_da_sorte' => $numeroSorte,
-                       'ativo' => 1,
-                       'created_at' => date('Y-m-d H:i:s'),
-                       'updated_at' => date('Y-m-d H:i:s')
-                   ];
+            // Preparar dados para inserção (todos os campos obrigatórios)
+            $participantData = [
+                'nome' => trim($data['nome']),
+                'email' => strtolower(trim($data['email'])),
+                'telefone' => $this->formatPhone($data['telefone']),
+                'instagram' => trim($data['instagram']),
+                'genero' => trim($data['genero']),
+                'idade' => trim($data['idade']),
+                'estado' => strtoupper(trim($data['estado'])),
+                'cidade' => trim($data['cidade']),
+                'filhos' => trim($data['filhos']),
+                'restaurante' => trim($data['restaurante']),
+                'tempo_hector' => trim($data['tempo_hector']),
+                'motivo' => trim($data['motivo']),
+                'comprometimento' => (int)$data['comprometimento'],
+                'comentario' => trim($data['comentario']),
+                'numero_da_sorte' => $numeroSorte,
+                'ativo' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
             
-                               // Inserir participante com todos os campos obrigatórios
-                   $this->db->query(
-                       "INSERT INTO participantes (nome, email, telefone, instagram, genero, idade, estado, cidade, filhos, restaurante, tempo_hector, motivo, comprometimento, comentario, numero_da_sorte, ativo, created_at, updated_at) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                       [
-                           $participantData['nome'],
-                           $participantData['email'],
-                           $participantData['telefone'],
-                           $participantData['instagram'],
-                           $participantData['genero'],
-                           $participantData['idade'],
-                           $participantData['estado'],
-                           $participantData['cidade'],
-                           $participantData['filhos'],
-                           $participantData['restaurante'],
-                           $participantData['tempo_hector'],
-                           $participantData['motivo'],
-                           $participantData['comprometimento'],
-                           $participantData['comentario'],
-                           $participantData['numero_da_sorte'],
-                           $participantData['ativo'],
-                           $participantData['created_at'],
-                           $participantData['updated_at']
-                       ]
-                   );
+            // Inserir participante com todos os campos obrigatórios
+            $this->db->query(
+                "INSERT INTO participantes (nome, email, telefone, instagram, genero, idade, estado, cidade, filhos, restaurante, tempo_hector, motivo, comprometimento, comentario, numero_da_sorte, ativo, created_at, updated_at) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $participantData['nome'],
+                    $participantData['email'],
+                    $participantData['telefone'],
+                    $participantData['instagram'],
+                    $participantData['genero'],
+                    $participantData['idade'],
+                    $participantData['estado'],
+                    $participantData['cidade'],
+                    $participantData['filhos'],
+                    $participantData['restaurante'],
+                    $participantData['tempo_hector'],
+                    $participantData['motivo'],
+                    $participantData['comprometimento'],
+                    $participantData['comentario'],
+                    $participantData['numero_da_sorte'],
+                    $participantData['ativo'],
+                    $participantData['created_at'],
+                    $participantData['updated_at']
+                ]
+            );
             
             $participantId = $this->db->lastInsertId();
             
             // Log da ação
+            $clientIp = $this->getClientIp();
             $this->logApiAction($clientIp, 'participante_criado', "Participante criado via API: {$data['email']}");
             
-                               // Resposta de sucesso
-                   apiResponse(true, [
-                       'id' => $participantId,
-                       'numero_da_sorte' => $numeroSorte,
-                       'email' => $data['email'],
-                       'nome' => $data['nome'],
-                       'instagram' => $data['instagram'],
-                       'genero' => $data['genero'],
-                       'idade' => $data['idade'],
-                       'cidade' => $data['cidade'],
-                       'estado' => $data['estado'],
-                       'filhos' => $data['filhos'],
-                       'restaurante' => $data['restaurante'],
-                       'tempo_hector' => $data['tempo_hector'],
-                       'motivo' => $data['motivo'],
-                       'comprometimento' => $data['comprometimento'],
-                       'comentario' => $data['comentario'],
-                       'created_at' => $participantData['created_at']
-                   ], 'Participante cadastrado com sucesso!');
+            // Resposta de sucesso
+            apiResponse(true, [
+                'id' => $participantId,
+                'numero_da_sorte' => $numeroSorte,
+                'email' => $data['email'],
+                'nome' => $data['nome'],
+                'instagram' => $data['instagram'],
+                'genero' => $data['genero'],
+                'idade' => $data['idade'],
+                'cidade' => $data['cidade'],
+                'estado' => $data['estado'],
+                'filhos' => $data['filhos'],
+                'restaurante' => $data['restaurante'],
+                'tempo_hector' => $data['tempo_hector'],
+                'motivo' => $data['motivo'],
+                'comprometimento' => $data['comprometimento'],
+                'comentario' => $data['comentario'],
+                'created_at' => $participantData['created_at']
+            ], 'Participante cadastrado com sucesso!');
             
         } catch (Exception $e) {
             error_log("Erro na API externa: " . $e->getMessage());
@@ -161,12 +156,6 @@ class ExternalApiController extends BaseController {
             apiResponse(false, null, 'Token de autenticação inválido', 401);
         }
         
-        // Verificar rate limit
-        $clientIp = $this->getClientIp();
-        if (!checkRateLimit($clientIp)) {
-            apiResponse(false, null, 'Rate limit excedido. Tente novamente mais tarde.', 429);
-        }
-        
         try {
             $email = urldecode($email);
             
@@ -188,6 +177,7 @@ class ExternalApiController extends BaseController {
             }
             
             // Log da ação
+            $clientIp = $this->getClientIp();
             $this->logApiAction($clientIp, 'participante_consultado', "Consulta via API: {$email}");
             
             // Resposta de sucesso
@@ -215,12 +205,6 @@ class ExternalApiController extends BaseController {
             apiResponse(false, null, 'Token de autenticação inválido', 401);
         }
         
-        // Verificar rate limit
-        $clientIp = $this->getClientIp();
-        if (!checkRateLimit($clientIp)) {
-            apiResponse(false, null, 'Rate limit excedido. Tente novamente mais tarde.', 429);
-        }
-        
         try {
             $page = max(1, (int)($_GET['page'] ?? 1));
             $limit = min(100, max(1, (int)($_GET['limit'] ?? 10)));
@@ -243,6 +227,7 @@ class ExternalApiController extends BaseController {
             $participantes = $stmt->fetchAll();
             
             // Log da ação
+            $clientIp = $this->getClientIp();
             $this->logApiAction($clientIp, 'participantes_listados', "Listagem via API: página {$page}");
             
             // Resposta de sucesso
@@ -276,9 +261,7 @@ class ExternalApiController extends BaseController {
                 'status' => 'healthy',
                 'timestamp' => date('c'),
                 'database' => $dbStatus,
-                'api_enabled' => getApiConfig('enabled'),
-                'rate_limit' => getApiConfig('rate_limit'),
-                'rate_limit_window' => getApiConfig('rate_limit_window')
+                'api_enabled' => getApiConfig('enabled')
             ];
             
             apiResponse(true, $status, 'API funcionando normalmente');

@@ -390,6 +390,75 @@ class AdminController extends BaseController {
         $this->renderModernPage('realizar-sorteio');
     }
     
+    /**
+     * Relatório detalhado de participantes
+     */
+    public function relatorioParticipantes() {
+        try {
+            // Obter filtros da URL
+            $filtros = [
+                'estado' => $this->get('estado'),
+                'cidade' => $this->get('cidade'),
+                'genero' => $this->get('genero'),
+                'idade_min' => $this->get('idade_min'),
+                'idade_max' => $this->get('idade_max'),
+                'tempo_hector' => $this->get('tempo_hector'),
+                'comprometimento' => $this->get('comprometimento'),
+                'search' => $this->get('search'),
+                'page' => max(1, (int)($this->get('page', 1))),
+                'per_page' => max(10, min(100, (int)($this->get('per_page', 50))))
+            ];
+
+            // Buscar participantes simples (sem filtros complexos por enquanto)
+            $participantes = [];
+            $total = 0;
+            
+            try {
+                $stmt = $this->db->query("SELECT COUNT(*) as total FROM participantes");
+                $total = $stmt->fetch()['total'];
+                
+                $offset = ($filtros['page'] - 1) * $filtros['per_page'];
+                $stmt = $this->db->query("SELECT * FROM participantes ORDER BY created_at DESC LIMIT ? OFFSET ?", 
+                    [$filtros['per_page'], $offset]);
+                $participantes = $stmt->fetchAll();
+            } catch (Exception $e) {
+                error_log("Erro ao buscar participantes: " . $e->getMessage());
+            }
+
+            // Gerar estatísticas reais para o dashboard
+            $estatisticas = $this->gerarEstatisticasDashboard();
+
+            // Dados básicos para a view
+            $data = [
+                'participantes' => $participantes,
+                'paginacao' => [
+                    'page' => $filtros['page'],
+                    'per_page' => $filtros['per_page'],
+                    'total_pages' => ceil($total / $filtros['per_page']),
+                    'total' => $total,
+                    'offset' => ($filtros['page'] - 1) * $filtros['per_page']
+                ],
+                'filtros' => $filtros,
+                'estatisticas' => $estatisticas,
+                'total_registros' => $total
+            ];
+
+            $this->renderModernPage('relatorio-participantes', $data);
+            
+        } catch (Exception $e) {
+            error_log("Erro no relatório de participantes: " . $e->getMessage());
+            // Em caso de erro, mostrar página com dados vazios
+            $data = [
+                'participantes' => [],
+                'paginacao' => ['page' => 1, 'per_page' => 50, 'total_pages' => 1, 'total' => 0, 'offset' => 0],
+                'filtros' => [],
+                'estatisticas' => [],
+                'total_registros' => 0
+            ];
+            $this->renderModernPage('relatorio-participantes', $data);
+        }
+    }
+    
     // Métodos auxiliares
     
     /**
@@ -398,6 +467,9 @@ class AdminController extends BaseController {
     private function renderModernPage($page, $data = []) {
         // Se não há auth, definir user como null (caso de login/logout)
         $user = $this->auth ? $this->auth->getUser() : null;
+        
+        // Definir variável auth para o layout
+        $auth = $this->auth;
         
         // Configurar variáveis para a view
         $titulo = ucfirst(str_replace(['admin/', '.php'], '', $page)) . ' - Admin Hector Studios';
@@ -761,6 +833,114 @@ class AdminController extends BaseController {
             );
             return $stmt->fetchAll();
         } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Gerar estatísticas para o dashboard
+     */
+    private function gerarEstatisticasDashboard() {
+        try {
+            $estatisticas = [];
+
+            // Total por estado
+            $stmt = $this->db->query("SELECT estado, COUNT(*) as total FROM participantes GROUP BY estado ORDER BY total DESC");
+            $estatisticas['por_estado'] = $stmt->fetchAll();
+
+            // Total por cidade (top 20)
+            $stmt = $this->db->query("SELECT cidade, COUNT(*) as total FROM participantes WHERE cidade IS NOT NULL AND cidade != '' GROUP BY cidade ORDER BY total DESC LIMIT 20");
+            $estatisticas['por_cidade'] = $stmt->fetchAll();
+
+            // Total por gênero
+            $stmt = $this->db->query("SELECT genero, COUNT(*) as total FROM participantes WHERE genero IS NOT NULL AND genero != '' GROUP BY genero ORDER BY total DESC");
+            $estatisticas['por_genero'] = $stmt->fetchAll();
+
+            // Total por faixa etária
+            $stmt = $this->db->query("SELECT
+                        CASE
+                            WHEN CAST(idade AS UNSIGNED) < 18 THEN 'Menor de 18'
+                            WHEN CAST(idade AS UNSIGNED) BETWEEN 18 AND 25 THEN '18-25'
+                            WHEN CAST(idade AS UNSIGNED) BETWEEN 26 AND 35 THEN '26-35'
+                            WHEN CAST(idade AS UNSIGNED) BETWEEN 36 AND 50 THEN '36-50'
+                            WHEN CAST(idade AS UNSIGNED) > 50 THEN 'Acima de 50'
+                            ELSE 'Não informado'
+                        END as faixa_etaria,
+                        COUNT(*) as total
+                    FROM participantes
+                    GROUP BY faixa_etaria
+                    ORDER BY
+                        CASE faixa_etaria
+                            WHEN 'Menor de 18' THEN 1
+                            WHEN '18-25' THEN 2
+                            WHEN '26-35' THEN 3
+                            WHEN '36-50' THEN 4
+                            WHEN 'Acima de 50' THEN 5
+                            ELSE 6
+                        END");
+            $estatisticas['por_faixa_etaria'] = $stmt->fetchAll();
+
+            // Total por tempo no Hector
+            $stmt = $this->db->query("SELECT tempo_hector, COUNT(*) as total FROM participantes WHERE tempo_hector IS NOT NULL AND tempo_hector != '' GROUP BY tempo_hector ORDER BY total DESC");
+            $estatisticas['por_tempo_hector'] = $stmt->fetchAll();
+
+            // Total por comprometimento
+            $stmt = $this->db->query("SELECT comprometimento, COUNT(*) as total FROM participantes WHERE comprometimento IS NOT NULL AND comprometimento != '' GROUP BY comprometimento ORDER BY comprometimento");
+            $estatisticas['por_comprometimento'] = $stmt->fetchAll();
+
+            // Total por restaurante (top 15)
+            $stmt = $this->db->query("SELECT restaurante, COUNT(*) as total FROM participantes WHERE restaurante IS NOT NULL AND restaurante != '' GROUP BY restaurante ORDER BY total DESC LIMIT 15");
+            $estatisticas['por_restaurante'] = $stmt->fetchAll();
+
+            // Total por filhos
+            $stmt = $this->db->query("SELECT filhos, COUNT(*) as total FROM participantes WHERE filhos IS NOT NULL AND filhos != '' GROUP BY filhos ORDER BY total DESC");
+            $estatisticas['por_filhos'] = $stmt->fetchAll();
+
+            // Análise de motivos (top 20)
+            $stmt = $this->db->query("SELECT 
+                        CASE 
+                            WHEN LENGTH(motivo) > 50 THEN CONCAT(LEFT(motivo, 50), '...')
+                            ELSE motivo 
+                        END as motivo_resumido,
+                        COUNT(*) as total 
+                    FROM participantes 
+                    WHERE motivo IS NOT NULL AND motivo != '' 
+                    GROUP BY motivo 
+                    ORDER BY total DESC 
+                    LIMIT 20");
+            $estatisticas['por_motivo'] = $stmt->fetchAll();
+
+            // Crescimento diário (últimos 30 dias)
+            $stmt = $this->db->query("SELECT
+                        DATE(created_at) as dia,
+                        COUNT(*) as total
+                    FROM participantes
+                    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    GROUP BY dia
+                    ORDER BY dia");
+            $estatisticas['crescimento_diario'] = $stmt->fetchAll();
+
+            // Estatísticas gerais
+            $stmt = $this->db->query("SELECT
+                        COUNT(*) as total_participantes,
+                        COUNT(CASE WHEN numero_da_sorte IS NOT NULL THEN 1 END) as com_numero_sorte,
+                        COUNT(CASE WHEN numero_da_sorte IS NULL THEN 1 END) as sem_numero_sorte,
+                        AVG(CAST(idade AS UNSIGNED)) as media_idade,
+                        MIN(CAST(idade AS UNSIGNED)) as idade_minima,
+                        MAX(CAST(idade AS UNSIGNED)) as idade_maxima,
+                        COUNT(CASE WHEN genero = 'M' OR genero = 'Masculino' THEN 1 END) as total_masculino,
+                        COUNT(CASE WHEN genero = 'F' OR genero = 'Feminino' THEN 1 END) as total_feminino,
+                        COUNT(CASE WHEN filhos = 'Sim' THEN 1 END) as com_filhos,
+                        COUNT(CASE WHEN filhos = 'Não' THEN 1 END) as sem_filhos,
+                        COUNT(CASE WHEN comprometimento >= 4 THEN 1 END) as alto_comprometimento,
+                        COUNT(CASE WHEN comprometimento <= 2 THEN 1 END) as baixo_comprometimento
+                    FROM participantes");
+            $estatisticas['gerais'] = $stmt->fetch();
+
+            return $estatisticas;
+
+        } catch (Exception $e) {
+            error_log("Erro ao gerar estatísticas do dashboard: " . $e->getMessage());
             return [];
         }
     }

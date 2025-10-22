@@ -1,0 +1,27 @@
+{
+  "name": "Hector Studios - Sorteios",
+  "short_name": "Hector Studios",
+  "description": "Sorteios com números exclusivos e prêmios incríveis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EFEFEA",
+  "theme_color": "#1A2891",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/images/250403_arq_marca_H_crepusculo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/250403_arq_marca_H_crepusculo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "games", "lifestyle"],
+  "lang": "pt-BR",
+  "dir": "ltr"
+}

@@ -35,7 +35,7 @@ class PublicApiController extends BaseController {
                 http_response_code(400);
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Dados inválidos'
+                    'message' => 'Dados de consulta não fornecidos'
                 ]);
                 return;
             }
@@ -75,11 +75,20 @@ class PublicApiController extends BaseController {
                     'data' => $dadosRetorno
                 ]);
             } else {
-                http_response_code(404);
-                echo json_encode([
-                    'success' => false,
-                    'message' => $resultado['message']
-                ]);
+                // Verificar se é erro de "não encontrado" ou erro interno
+                if (strpos($resultado['message'], 'não encontrado') !== false) {
+                    http_response_code(404);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Participante não encontrado. Verifique o email ou número da sorte informado.'
+                    ]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Erro interno do servidor. Tente novamente mais tarde.'
+                    ]);
+                }
             }
             
         } catch (Exception $e) {
@@ -98,19 +107,19 @@ class PublicApiController extends BaseController {
     private function buscarPremiosGanhos($participanteId) {
         try {
             $db = getDB();
-                    $stmt = $db->query("
-            SELECT 
-                v.sorteio_id,
-                COALESCE(s.titulo, CONCAT('Sorteio #', s.id)) as nome_sorteio,
-                COALESCE(s.premio, 'Prêmio') as valor_premio,
-                v.data_sorteio,
-                COALESCE(s.premio, 'Prêmio') as descricao_premio
-            FROM vencedores v
-            LEFT JOIN sorteios s ON v.sorteio_id = s.id
-            WHERE v.participante_id = ? 
-            AND v.status = 'confirmado'
-            ORDER BY v.data_sorteio DESC
-        ", [$participanteId]);
+            $stmt = $db->query("
+                SELECT 
+                    v.sorteio_id,
+                    COALESCE(s.titulo, CONCAT('Sorteio #', s.id)) as nome_sorteio,
+                    COALESCE(s.premio, 'Prêmio') as valor_premio,
+                    v.data_sorteio,
+                    COALESCE(s.premio, 'Prêmio') as descricao_premio
+                FROM vencedores v
+                LEFT JOIN sorteios s ON v.sorteio_id = s.id
+                WHERE v.participante_id = ? 
+                AND v.status = 'confirmado'
+                ORDER BY v.data_sorteio DESC
+            ", [$participanteId]);
             
             $premios = [];
             while ($row = $stmt->fetch()) {
